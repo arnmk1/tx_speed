@@ -23,6 +23,7 @@ function final_output {
 	rm ./$FCATCHER
 }
 
+#
 
 # src text catcher
 FCATCHER='catcher.sh'
