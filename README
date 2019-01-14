@@ -1,1 +1,25 @@
-Count traffic using bash shell. Div +/- 2% 
+Count traffic using bash shell. Div +/- 2%
+
+Run:
+chmod 755 ./load_int_sum.sh
+./load_int_sum.sh
+or 
+bash ./load_int_sum.sh
+
+Output all system interface counters. Ending press 'Ctrl + C' Output summary statistics.
+Exmpl:
+
+
+eth0: In 1461 Out 1486
+eth1: In 6681 Out 7471
+eth2: In 460 Out 956
+eth3: In 60 Out 60
+lo: In 0 Out 0
+^C
+Interface: eth0 - Total in: 4958 Total out: 4950 Max in: 2770 Max out: 2196
+Interface: eth1 - Total in: 10493 Total out: 11794 Max in: 6681 Max out: 7471
+Interface: eth2 - Total in: 940 Total out: 1798 Max in: 460 Max out: 956
+Interface: eth3 - Total in: 180 Total out: 180 Max in: 60 Max out: 60
+Interface: lo - Total in: 0 Total out: 0 Max in: 0 Max out: 0
+Kill catcher
+ 
