@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+# functions
+
 function scale {
 	
 	let GB=1024*1024*1024
@@ -66,6 +68,8 @@ function final_output {
 	pkill -9 $FCATCHER && echo "Kill catcher"
 	rm ./$FCATCHER
 }
+
+# end functions
 
 
 # src text catcher
