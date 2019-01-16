@@ -8,7 +8,8 @@ function scale {
 	let KB=1024
 	let B=1
 
-	if [ $1 -eq 0 ]; then
+	# if 0 or bc not exist
+	if [ $1 -eq 0 ] || [ ! -x `which bc` ]; then
 		echo "$1"
 		return 1
 	fi
