@@ -92,6 +92,26 @@ done
 CATCHER`
 # end src 
 
+int='.'
+
+while getopts "i:h" opt; do
+	case $opt in 
+		i)
+		int=$OPTARG
+	;;
+		h)
+		echo "Help: " && exit 1
+	;;
+		*)
+		echo "Usage: " && exit 1
+		
+	;;	
+	esac
+done
+
+
+
+
 # rm old catche if exsist 
 rm ./$FCATCHER 2>/dev/null
 
@@ -100,11 +120,11 @@ echo "$catcher" > ./$FCATCHER
 chmod 755 ./$FCATCHER
 
 # arrays interfaces and countes 
-declare -a int_names=(`cat /proc/net/dev | grep : |  awk -F ':' '{print $1}'`)
+declare -a int_names=(`cat /proc/net/dev | grep : |  grep ${int} | awk -F ':' '{print $1}'`)
 declare -A iface
 
 # total number interfaces
-tnum_int=${#int_names[*]}
+tnum_int=`cat /proc/net/dev | grep : | wc -l`
 
 # kill old catcher 
 pkill -9 $FCATCHER && echo "Kill old catcher"
@@ -128,6 +148,15 @@ done
 # set trap interrupt Ctr + C 
 trap 'final_output; exit 1' 2
 
+
+# print table
+tput cpu 0 0
+clear
+for i_name in ${int_names[*]}; do
+	echo "$i_name: "
+done
+
+
 # main cycle
 while true; do
 	for i_name in ${int_names[*]}; do
@@ -142,9 +171,6 @@ while true; do
 		iface["${i_name} total_in"]=$((${iface["${i_name} total_in"]}+${iface["${i_name} in"]}))
 		iface["${i_name} total_out"]=$((${iface["${i_name} total_out"]}+${iface["${i_name} out"]}))
 
-        	FORMAT="%s: In %s Out %s\n"
-        	printf "$FORMAT" $i_name "$(scale ${iface["${i_name} in"]} 's')" "$(scale ${iface["${i_name} out"]} 's')"
-
 	        if [ ${iface["${i_name} max_o"]} -le ${iface["${i_name} out"]} ]; then
         		iface["${i_name} max_o"]=${iface["${i_name} out"]}
         	fi
@@ -154,8 +180,20 @@ while true; do
         	fi
 	done
 	((counter++))
+
+
+	# output 
+	col=0
+	tput cup $col 5
+	for i_name in ${int_names[*]}; do
+		tput el # clear screen from postion to end string
+       		FORMAT=" In %s\tOut %s\n"
+       		printf "$FORMAT" "$(scale ${iface["${i_name} in"]} 's')" "$(scale ${iface["${i_name} out"]} 's')"
+		((col++))
+		tput cup $col 5 # change cursor postion
+	done
+
         sleep 1
 
-        clear
 
 done
