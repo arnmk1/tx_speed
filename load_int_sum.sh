@@ -150,7 +150,7 @@ trap 'final_output; exit 1' 2
 
 
 # print table
-tput cpu 0 0
+tput cup 0 0
 clear
 for i_name in ${int_names[*]}; do
 	echo "$i_name: "
