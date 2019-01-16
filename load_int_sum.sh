@@ -1,21 +1,64 @@
 #!/bin/bash
 
 
+function scale {
+	
+	let GB=1024*1024*1024
+	let MB=1024*1024
+	let KB=1024
+	let B=1
+
+	if [ $1 -eq 0 ]; then
+		echo "$1"
+		return 1
+	fi
+
+	if [ $1 -gt $GB ]; then
+		scl=$GB
+		o_rscl='GB/s'
+		o_scl='GB'
+
+	elif [ $1 -gt $MB ]; then
+		scl=$MB
+		o_rscl='MB/s'
+		o_scl='MB'
+
+	elif [ $1 -gt $KB ]; then
+		scl=$KB
+		o_rscl='KB/s'
+		o_scl='KB'
+
+	elif [ $1 -gt $B ]; then
+		scl=$B
+		o_rscl='B/s'
+		o_scl='B'
+	fi 
+
+	out=$(echo "scale=3; $1/$scl" | bc)
+
+	if [ "$2" == 's' ]; then
+		echo "$out $o_rscl"
+	else 
+		echo "$out $o_scl" 
+	fi
+
+}
+
 function get_counter {
 	if [ $3 == 'in' ]; then
-		echo `cat /tmp/int |  grep "^\*\*${2}$" -A 5 | grep "${1}" | awk '{print $2}'`
+		echo `cat /tmp/int |  grep "^\*\*${2}$" -A ${tnum_int} | grep ${1} | awk '{print $2}'`
 	fi
 	
 	if [ $3 == 'out' ]; then
-		echo `cat /tmp/int |  grep "^\*\*${2}$" -A 5 | grep ${1} | awk '{print $10}'`
+		echo `cat /tmp/int |  grep "^\*\*${2}$" -A ${tnum_int} | grep ${1} | awk '{print $10}'`
 	fi 
 }
 
 function final_output {
 	echo 
 	for i_name in ${int_names[*]}; do
-		local FORMAT="Interface: %s - Total in: %d Total out: %d Max in: %d Max out: %d\n"
-		printf "$FORMAT" $i_name ${iface["${i_name} total_in"]} ${iface["${i_name} total_out"]} ${iface["${i_name} max_i"]} ${iface["${i_name} max_o"]}
+		local FORMAT="Interface: %s - Total in: %s Total out: %s Max in: %s Max out: %s\n"
+		printf "$FORMAT" $i_name "$(scale ${iface["${i_name} total_in"]})" "$(scale ${iface["${i_name} total_out"]})" "$(scale ${iface["${i_name} max_i"]} 's')" "$(scale ${iface["${i_name} max_o"]} 's')"
 	done
 
 	# kill catcher and rm tmp script
@@ -23,7 +66,6 @@ function final_output {
 	rm ./$FCATCHER
 }
 
-#
 
 # src text catcher
 FCATCHER='catcher.sh'
@@ -53,8 +95,11 @@ echo "$catcher" > ./$FCATCHER
 chmod 755 ./$FCATCHER
 
 # arrays interfaces and countes 
-declare -a int_names=`cat /proc/net/dev | grep : |  awk -F ':' '{print $1}'`
+declare -a int_names=(`cat /proc/net/dev | grep : |  awk -F ':' '{print $1}'`)
 declare -A iface
+
+# total number interfaces
+tnum_int=${#int_names[*]}
 
 # kill old catcher 
 pkill -9 $FCATCHER && echo "Kill old catcher"
@@ -92,8 +137,8 @@ while true; do
 		iface["${i_name} total_in"]=$((${iface["${i_name} total_in"]}+${iface["${i_name} in"]}))
 		iface["${i_name} total_out"]=$((${iface["${i_name} total_out"]}+${iface["${i_name} out"]}))
 
-        	FORMAT="%s: In %d Out %d\n"
-        	printf "$FORMAT" $i_name ${iface["${i_name} in"]} ${iface["${i_name} out"]}
+        	FORMAT="%s: In %s Out %s\n"
+        	printf "$FORMAT" $i_name "$(scale ${iface["${i_name} in"]} 's')" "$(scale ${iface["${i_name} out"]} 's')"
 
 	        if [ ${iface["${i_name} max_o"]} -le ${iface["${i_name} out"]} ]; then
         		iface["${i_name} max_o"]=${iface["${i_name} out"]}
