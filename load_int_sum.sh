@@ -37,7 +37,7 @@ function scale {
 		o_scl='B'
 	fi 
 
-	out=$(echo "scale=3; $1/$scl" | bc)
+	out=$(echo "scale=2; $1/$scl" | bc)
 
 	if [ "$2" == 's' ]; then
 		echo "$out $o_rscl"
@@ -156,6 +156,8 @@ for i_name in ${int_names[*]}; do
 	echo "$i_name: "
 done
 
+# invisible cursor
+tput civis
 
 # main cycle
 while true; do
