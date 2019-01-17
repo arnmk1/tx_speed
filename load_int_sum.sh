@@ -67,6 +67,7 @@ function final_output {
 	# kill catcher and rm tmp script
 	pkill -9 $FCATCHER && echo "Kill catcher"
 	rm ./$FCATCHER
+	tput cnorm
 }
 
 # end functions
